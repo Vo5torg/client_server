@@ -1,6 +1,6 @@
 import asyncio
 import json
-from Protokol_server import RequestForServer, ResponseForServer
+from server_protocol import RequestForServer, ResponseForServer
 
 
 class Server:
