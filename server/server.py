@@ -1,5 +1,6 @@
 import asyncio
 import json
+from Protokol_server import RequestForServer, ResponseForServer
 
 
 class Server:
@@ -9,30 +10,29 @@ class Server:
         self.server = None
 
     async def handle_request(self, reader, writer):
+
         addr = writer.get_extra_info('peername')
         print("Подключился: ", addr)
         data = await reader.read(1024)
-        request = json.loads(data.decode())
+        request = RequestForServer(json.loads(data.decode()))
         # Обработка запроса на стороне сервера
         response = self.process_request(request)
         writer.write(json.dumps(response).encode())
         await writer.drain()
         writer.close()
 
-    def process_request(self, message):
-        # Логика обработки запроса
-        return message
+    def process_request(self, request):
+        response = ResponseForServer()
+        return response
 
     async def start(self):
         try:
             server = await asyncio.start_server(self.handle_request, self.host, self.port)
-
             addr = server.sockets[0].getsockname()
             print(f'Serving on {addr}')
 
             async with server:
                 await server.serve_forever()
-
         except Exception as e:
             print(f"An error occurred: {str(e)}")
 

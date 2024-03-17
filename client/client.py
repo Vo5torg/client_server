@@ -4,10 +4,12 @@ import random
 
 
 class Client:
-    def __init__(self, server_host, server_port):
+    def __init__(self, server_host, server_port, client_id):
         self.server_host = server_host
         self.server_port = server_port
-        self.id = 1
+        self.authorized = False
+        self.message_id = 1
+        self.client_id = client_id
 
     async def run_client(self, message):
         reader, writer = await asyncio.open_connection(self.server_host, self.server_port)
@@ -15,44 +17,17 @@ class Client:
         await writer.drain()
         response = await reader.read(1024)
         print(f'Response: {json.loads(response.decode())}')
-
         writer.close()
         await writer.wait_closed()
-
-
-def read_json():
-    with open("data.json", "r", encoding='utf-8') as read_file:
-        data = json.load(read_file)
-    return data
-
-
-def dumb_json(data):
-    with open("data.json", "w", encoding='utf-8') as write_file:
-        json.dump(data, write_file, ensure_ascii=False)
 
 
 info_client = {
     "client_id": 1,
     "admim": False,
     "login": "",
-    "password": "",
-    "allowed_operations": {"bin-oct": True, "bin-dec": True, "bin-hex": True, "oct-bin": True,
-                           "oct-dec": True,
-                           "oct-hex": True, "dec-oct": True, "dec-bin": True, "dec-hex": True,
-                           "hex-oct": True,
-                           "hex-bin": True, "hex-dec": True}
-
+    "allowed_operations": {"bin": True, "oct": True, "dec": True, "hex": True}
 }
 
 protocol = {
-    "response": {
-        "user_id": "",
-        "action": ""
-    },
-    "request": {},
-    "user_id": "",
-    "action": ["reg", "auth", "get", "set"],
-    "error": ""
+    "action": ["reg", "auth", "get", "set", "get_users", "block_ip"],
 }
-client = Client('localhost', 8881)
-asyncio.run(client.run_client("11"))

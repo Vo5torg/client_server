@@ -54,22 +54,22 @@ class NumberConverter:
         decimal_number = int(str(number), 16)
         return oct(decimal_number)[2:]
 
-    map_conv = {"bin-oct": binary_to_octal, "bin-dec": binary_to_decimal,
-                "bin-hex": binary_to_hexadecimal,
-                "oct-bin": octal_to_binary, "oct-dec": octal_to_decimal,
-                "oct-hex": octal_to_hexadecimal,
-                "dec-oct": decimal_to_octal, "dec-bin": decimal_to_binary,
-                "dec-hex": decimal_to_hexadecimal, "hex-oct": hexadecimal_to_octal,
-                "hex-bin": hexadecimal_to_binary, "hex-dec": hexadecimal_to_decimal}
+    map_conv = {"bin_oct": binary_to_octal, "bin_dec": binary_to_decimal,
+                "bin_hex": binary_to_hexadecimal,
+                "oct_bin": octal_to_binary, "oct_dec": octal_to_decimal,
+                "oct_hex": octal_to_hexadecimal,
+                "dec_oct": decimal_to_octal, "dec_bin": decimal_to_binary,
+                "dec_hex": decimal_to_hexadecimal, "hex_oct": hexadecimal_to_octal,
+                "hex_bin": hexadecimal_to_binary, "hex_dec": hexadecimal_to_decimal}
 
-    words_map_conv = {"bin-oct": ["двоичной", "восьмиричную"], "bin-dec": ["двоичной", "десятиричную"],
-                      "bin-hex": ["двоичной", "шестнадцатеричную"],
-                      "oct-bin": ["восьмиричной", "двоичную"], "oct-dec": ["восьмиричной", "десятичную"],
-                      "oct-hex": ["восьмиричной", "шестнадцатеричную"],
-                      "dec-oct": ["десятиричной", "восьмиричную"], "dec-bin": ["десятиричной", "двоичную"],
-                      "dec-hex": ["десятиричной", "шестнадцатеричную"],
-                      "hex-oct": ["шестнадцатеричной", "восьмиричную"],
-                      "hex-bin": ["шестнадцатеричной", "двоичную"], "hex-dec": ["шестнадцатеричной", "десятиричную"]}
+    words_map_conv = {"bin_oct": ["двоичной", "восьмиричную"], "bin_dec": ["двоичной", "десятиричную"],
+                      "bin_hex": ["двоичной", "шестнадцатеричную"],
+                      "oct_bin": ["восьмиричной", "двоичную"], "oct_dec": ["восьмиричной", "десятичную"],
+                      "oct_hex": ["восьмиричной", "шестнадцатеричную"],
+                      "dec_oct": ["десятиричной", "восьмиричную"], "dec_bin": ["десятиричной", "двоичную"],
+                      "dec_hex": ["десятиричной", "шестнадцатеричную"],
+                      "hex_oct": ["шестнадцатеричной", "восьмиричную"],
+                      "hex_bin": ["шестнадцатеричной", "двоичную"], "hex_dec": ["шестнадцатеричной", "десятиричную"]}
 
     @staticmethod
     def hexadecimal_to_octal(number):
