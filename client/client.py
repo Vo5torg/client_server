@@ -1,6 +1,7 @@
 import asyncio
 import json
 import random
+from protocol import Protocol
 
 
 class Client:
@@ -8,17 +9,21 @@ class Client:
         self.server_host = server_host
         self.server_port = server_port
         self.authorized = False
-        self.message_id = 1
+        self.message_id = 0
         self.client_id = client_id
 
-    async def run_client(self, message):
+    async def send_message(self, message):
         reader, writer = await asyncio.open_connection(self.server_host, self.server_port)
         writer.write(json.dumps(message).encode())
         await writer.drain()
-        response = await reader.read(1024)
-        print(f'Response: {json.loads(response.decode())}')
+        response_encoding = await reader.read(1024)
+        response = json.loads(response_encoding.decode())
+        print(f'Response: {response}')
         writer.close()
         await writer.wait_closed()
+
+    async def process_request(self, request_json):
+        pass
 
 
 info_client = {
@@ -29,5 +34,5 @@ info_client = {
 }
 
 protocol = {
-    "action": ["reg", "auth", "get", "set", "get_users", "block_ip"],
+    "action": ["reg", "auth", "get", "set", "show_users", "block_ip"],
 }

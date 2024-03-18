@@ -6,8 +6,10 @@ from client import Client
 system_ = ["bin", "oct", "dec", "hex"]
 
 client = Client('localhost', 8881, 1)
-asyncio.run(client.run_client("11"))
-
+# asyncio.run(client.send_message("11"))
+functions = {"reg": registration, "auth": authorization, "get": get_permission,
+                          "set": set_permission, "show_users": block_ip, "block_ip": block_ip,
+                          "allow_ip": allow_ip}
 while True:
     try:
         input_text = input().strip().split()
@@ -15,7 +17,7 @@ while True:
         param = input_text[1]
         args = input_text[2:]
         if "reg" in command:
-            pass
+            asyncio.run(client.send_message({'action': "reg"}))
         elif "auth" in command:
             pass
         elif "conv" in command:

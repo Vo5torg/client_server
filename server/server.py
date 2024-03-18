@@ -1,6 +1,7 @@
 import asyncio
 import json
-from server_protocol import RequestForServer, ResponseForServer
+from database import AsyncDataBase
+from protocol import Protocol
 
 
 class Server:
@@ -8,22 +9,22 @@ class Server:
         self.host = host
         self.port = port
         self.server = None
+        self.db = AsyncDataBase()
+        self.functions = {"reg": self.registration, "auth": self.authorization, "get": self.get_permission,
+                          "set": self.set_permission, "show_users": self.block_ip, "block_ip": self.block_ip,
+                          "allow_ip": self.allow_ip}
 
-    async def handle_request(self, reader, writer):
-
-        addr = writer.get_extra_info('peername')
-        print("Подключился: ", addr)
-        data = await reader.read(1024)
-        request = RequestForServer(json.loads(data.decode()))
-        # Обработка запроса на стороне сервера
-        response = self.process_request(request)
-        writer.write(json.dumps(response).encode())
-        await writer.drain()
-        writer.close()
-
-    def process_request(self, request):
-        response = ResponseForServer()
-        return response
+    def run(self):
+        loop = asyncio.get_event_loop()
+        try:
+            loop.run_until_complete(self.start())
+        except KeyboardInterrupt:
+            print("Server interrupted")
+        except Exception as Ex:
+            print(Ex)
+        finally:
+            self.stop()
+            loop.close()
 
     async def start(self):
         try:
@@ -40,12 +41,112 @@ class Server:
         if self.server:
             self.server.close()
 
-    def run(self):
-        loop = asyncio.get_event_loop()
-        try:
-            loop.run_until_complete(self.start())
-        except KeyboardInterrupt:
-            print("Server interrupted")
-        finally:
-            self.stop()
-            loop.close()
+    async def handle_request(self, reader, writer):
+
+        addr = writer.get_extra_info('peername')
+        print("Подключился: ", addr)
+        data = await reader.read(1024)
+        request = json.loads(data.decode())
+        request["ip"] = addr
+        response_json = self.process_request(request)
+        writer.write(json.dumps(response_json).encode())
+        await writer.drain()
+        writer.close()
+
+    async def process_request(self, request_json):
+
+        request = Protocol(request_json)
+        pre_response = {
+            "message_id": request.message_id + 1,
+            "client_id": request.client_id,
+            "action": request.action
+        }
+        response = Protocol(pre_response)
+        if not self.db.is_ip_blocked(request.ip):
+            response = await self.functions.get(request.action)(request, response)
+            response.ip_blocked = False
+        else:
+            response.ip_blocked = True
+            response.status = False
+        return response.dict_json
+
+    async def registration(self, req, res):
+        if not (req.login and req.password):
+            res.status = False
+        else:
+            result = await self.db.add_user(req.login, req.password, False, req.ip)
+            res.status = result
+        return res
+
+    async def authorization(self, req, res):
+        if not (req.login and req.password):
+            res.status = False
+        else:
+            user = await self.db.get_user(req.login)
+            if user:
+                if user[2] == req.password:
+                    res.status = True
+                else:
+                    res.status = False
+            else:
+                res.status = False
+        return res
+
+    async def get_permission(self, req, res):
+        perm = await self.db.get_permission(req.login)
+        if perm:
+            res.status = True
+            res.other_data = perm
+        else:
+            res.status = False
+        return res
+
+    async def set_permission(self, req, res):
+        admin = await self.db.is_admin(req.login)
+        if admin:
+            result = await self.db.set_permission(req.other_data["user_login"], req.other_data["option"],
+                                                  req.other_data["value"])
+            if result:
+                res.status = True
+            else:
+                res.status = False
+        else:
+            res.status = False
+        return res
+
+    async def get_users(self, req, res):
+        admin = await self.db.is_admin(req.login)
+        if admin:
+            users_list = await self.db.get_users()
+            if users_list:
+                req.other_data["users_list"] = users_list
+                res.status = True
+            else:
+                res.status = False
+        else:
+            res.status = False
+        return res
+
+    async def block_ip(self, req, res):
+        admin = await self.db.is_admin(req.login)
+        if admin:
+            result = await self.db.block_ip(req.ip)
+            if result:
+                res.status = True
+            else:
+                res.status = False
+        else:
+            res.status = False
+        return res
+
+    async def allow_ip(self, req, res):
+        admin = await self.db.is_admin(req.login)
+        if admin:
+            result = await self.db.allow_ip(req.ip)
+            if result:
+                res.status = True
+            else:
+                res.status = False
+        else:
+            res.status = False
+        return res
