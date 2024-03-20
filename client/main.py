@@ -1,6 +1,5 @@
 import asyncio
 import argparse
-from distutils import util
 from number_converter import NumberConverter
 from client import Client
 from my_error import *
@@ -55,10 +54,10 @@ while meow:
         elif "conv" in command:
             response = asyncio.run(client.get_permission())
             if type(args[0]) == str and type(args[1]) == str and len(args) == 3:
-                perm = {"bin": util.strtobool(str(response.other_data[2])),
-                        "oct": util.strtobool(str(response.other_data[3])),
-                        "dec": util.strtobool(str(response.other_data[4])),
-                        "hex": util.strtobool(str(response.other_data[5]))}
+                perm = {"bin": (True if str(response.other_data[2]).lower() in ["true", "1"] else False),
+                        "oct": (True if str(response.other_data[3]).lower() in ["true", "1"] else False),
+                        "dec": (True if str(response.other_data[4]).lower() in ["true", "1"] else False),
+                        "hex": (True if str(response.other_data[5]).lower() in ["true", "1"] else False)}
                 operation = str(args[0]) + "_" + str(args[1])
                 if (operation in nums_conv.map_conv.keys()) and args[2]:
                     if perm.get(args[0]):
