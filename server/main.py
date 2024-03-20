@@ -3,6 +3,6 @@ import asyncio
 
 
 # Запуск сервера
-server = Server('localhost', 8881)
+server = Server('localhost', 8882)
 server.run()
 

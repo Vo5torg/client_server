@@ -95,6 +95,18 @@ class AsyncDataBase:
             return False
 
     @staticmethod
+    async def show_block_ip():
+        try:
+            async with aiosqlite.connect('database.db') as db:
+                cursor = await db.execute('SELECT * FROM BlockedIP;')
+                rows = await cursor.fetchall()
+                if rows:
+                    return rows
+                return False
+        except Exception as Ex:
+            return False
+
+    @staticmethod
     async def block_ip(ip):
         try:
             async with aiosqlite.connect('database.db') as db:
@@ -143,7 +155,7 @@ class AsyncDataBase:
 async def run():
     data_base = AsyncDataBase()
     await data_base.create_tables()
-    await data_base.add_user("admin", "admin", "True", "192.168.0.2")
+    await data_base.add_user("admin", "admin", "True", "192.168.0.1")
     # await data_base.delete_user("admin")
     # await data_base.block_ip("192.127.0.2")
     # await data_base.allow_ip("192.127.0.2")

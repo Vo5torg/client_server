@@ -11,8 +11,8 @@ class Server:
         self.server = None
         self.db = AsyncDataBase()
         self.functions = {"reg": self.registration, "auth": self.authorization, "get": self.get_permission,
-                          "set": self.set_permission, "show_users": self.block_ip, "block_ip": self.block_ip,
-                          "allow_ip": self.allow_ip}
+                          "set": self.set_permission, "show_users": self.get_users, "block_ip": self.block_ip,
+                          "allow_ip": self.allow_ip, "show_ip": self.show_block_ip}
 
     def run(self):
         loop = asyncio.get_event_loop()
@@ -47,8 +47,9 @@ class Server:
         print("Подключился: ", addr)
         data = await reader.read(1024)
         request = json.loads(data.decode())
-        request["ip"] = addr
-        response_json = self.process_request(request)
+        request["ip"] = addr[0]
+        request["port"] = addr[1]
+        response_json = await self.process_request(request)
         writer.write(json.dumps(response_json).encode())
         await writer.drain()
         writer.close()
@@ -62,7 +63,7 @@ class Server:
             "action": request.action
         }
         response = Protocol(pre_response)
-        if not self.db.is_ip_blocked(request.ip):
+        if not await self.db.is_ip_blocked(request.ip):
             response = await self.functions.get(request.action)(request, response)
             response.ip_blocked = False
         else:
@@ -71,6 +72,7 @@ class Server:
         return response.dict_json
 
     async def registration(self, req, res):
+        print(f"Запрос на регистрация пользователя: {req.login}, ip/port: {req.ip}/{req.port}")
         if not (req.login and req.password):
             res.status = False
         else:
@@ -79,12 +81,16 @@ class Server:
         return res
 
     async def authorization(self, req, res):
+        print(f"Запрос на авторизацию пользователя: {req.login}, ip/port: {req.ip}/{req.port}")
         if not (req.login and req.password):
             res.status = False
         else:
             user = await self.db.get_user(req.login)
+            admin = await self.db.is_admin(req.login)
             if user:
                 if user[2] == req.password:
+                    if admin:
+                        res.is_admin = True
                     res.status = True
                 else:
                     res.status = False
@@ -93,6 +99,7 @@ class Server:
         return res
 
     async def get_permission(self, req, res):
+        print(f"Запрос разрешений пользователем: {req.login}, ip/port: {req.ip}/{req.port}")
         perm = await self.db.get_permission(req.login)
         if perm:
             res.status = True
@@ -102,8 +109,10 @@ class Server:
         return res
 
     async def set_permission(self, req, res):
+        print(f"Запрос на изменение прав: {req.login}, ip/port: {req.ip}/{req.port}")
         admin = await self.db.is_admin(req.login)
         if admin:
+            res.is_admin = True
             result = await self.db.set_permission(req.other_data["user_login"], req.other_data["option"],
                                                   req.other_data["value"])
             if result:
@@ -111,42 +120,68 @@ class Server:
             else:
                 res.status = False
         else:
+            res.is_admin = False
             res.status = False
         return res
 
     async def get_users(self, req, res):
+        print(f"Запрос списка пользователей админом: {req.login}, ip/port: {req.ip}/{req.port}")
         admin = await self.db.is_admin(req.login)
         if admin:
+            res.is_admin = True
             users_list = await self.db.get_users()
             if users_list:
-                req.other_data["users_list"] = users_list
+                res.other_data = users_list
                 res.status = True
             else:
                 res.status = False
         else:
+            res.is_admin = False
+            res.status = False
+        return res
+
+    async def show_block_ip(self, req, res):
+        print(f"Запрос на список заблокированных айпи админом: {req.login}, ip/port: {req.ip}/{req.port}")
+        admin = await self.db.is_admin(req.login)
+        if admin:
+            res.is_admin = True
+            result = await self.db.show_block_ip()
+            if result:
+                res.other_data = result
+                res.status = True
+            else:
+                res.status = False
+        else:
+            res.is_admin = False
             res.status = False
         return res
 
     async def block_ip(self, req, res):
+        print(f"Запрос на блокировку айпи {req.other_data} админом: {req.login}, ip/port: {req.ip}/{req.port}")
         admin = await self.db.is_admin(req.login)
         if admin:
-            result = await self.db.block_ip(req.ip)
+            res.is_admin = True
+            result = await self.db.block_ip(req.other_data)
             if result:
                 res.status = True
             else:
                 res.status = False
         else:
+            res.is_admin = False
             res.status = False
         return res
 
     async def allow_ip(self, req, res):
+        print(f"Запрос разблокировку айпи {req.other_data} админом: {req.login}, ip/port: {req.ip}/{req.port}")
         admin = await self.db.is_admin(req.login)
         if admin:
-            result = await self.db.allow_ip(req.ip)
+            res.is_admin = True
+            result = await self.db.allow_ip(req.other_data)
             if result:
                 res.status = True
             else:
                 res.status = False
         else:
+            res.is_admin = False
             res.status = False
         return res

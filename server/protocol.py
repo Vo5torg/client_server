@@ -27,6 +27,14 @@ class Protocol:
         self.dict_json["ip"] = x
 
     @property
+    def port(self):
+        return self.dict_json.get("port")
+
+    @port.setter
+    def port(self, x):
+        self.dict_json["port"] = x
+
+    @property
     def login(self):
         return self.dict_json.get('login')
 
@@ -65,6 +73,14 @@ class Protocol:
     @ip_blocked.setter
     def ip_blocked(self, x):
         self.dict_json["ip_blocked"] = x
+
+    @property
+    def is_admin(self):
+        return self.dict_json.get("is_admin")
+
+    @is_admin.setter
+    def is_admin(self, x):
+        self.dict_json["is_admin"] = x
 
     @property
     def other_data(self):
