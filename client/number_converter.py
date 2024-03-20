@@ -23,11 +23,11 @@ class NumberConverter:
         return int(str(number), 2)
 
     def binary_to_octal(self, number):
-        decimal_number = NumberConverter.binary_to_decimal(int(number))
+        decimal_number = self.binary_to_decimal(int(number))
         return oct(decimal_number)[2:]
 
     def binary_to_hexadecimal(self, number):
-        decimal_number = NumberConverter.binary_to_decimal(int(number))
+        decimal_number = self.binary_to_decimal(int(number))
         return hex(decimal_number)[2:]
 
     def decimal_to_binary(self, number):
@@ -88,20 +88,5 @@ class NumberConverter:
                       "hex_oct": ["шестнадцатеричной", "восьмиричную"],
                       "hex_bin": ["шестнадцатеричной", "двоичную"], "hex_dec": ["шестнадцатеричной", "десятиричную"]}
 
-    @staticmethod
-    def hexadecimal_to_octal(number):
-        decimal_number = int(str(number), 16)
-        return oct(decimal_number)[2:]
 
-# num = NumberConverter()
-# args = ["dec", "bin", 2]
-# if type(args[0]) == str and type(args[1]) == str and len(args) == 3:
-#     operation = str(args[0]) + "_" + str(args[1])
-#     if (operation in NumberConverter.map_conv.keys()) and args[2]:
-#         print("Перевод числа {} из {} в {} систему: {}".format(args[2], *NumberConverter.words_map_conv[operation],
-#                                                                NumberConverter.map_conv[operation](args[2])))
-#     else:
-#         print(2)
-# # print(
-# #         "Перевод числа {} из {} в {} систему: {}".format(args[0], *NumberConverter.words_map_conv[args],
-# #                                                          NumberConverter.map_conv[args](args[0])))
+#
