@@ -5,11 +5,12 @@ from client import Client
 from my_error import *
 
 parser = argparse.ArgumentParser(description='convertor of number systems')
+parser.add_argument('ip', type=str, help='ip')
 parser.add_argument('port', type=int, help='server_port')
 parser.add_argument('id', type=int, help='client_id')
 args = parser.parse_args()
 
-client = Client("localhost", args.port, args.id)
+client = Client(args.ip, args.port, args.id)
 print("Введите команду 'info' чтобы узнать что делать.")
 meow = True
 nums_conv = NumberConverter()
