@@ -144,3 +144,7 @@ class Client:
             return res
         else:
             raise Exception
+
+    @staticmethod
+    def str_true(value):
+        return True if str(value).lower() in ["true", "1"] else False

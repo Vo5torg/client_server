@@ -55,10 +55,10 @@ while meow:
         elif "conv" in command:
             response = asyncio.run(client.get_permission())
             if type(args[0]) == str and type(args[1]) == str and len(args) == 3:
-                perm = {"bin": (True if str(response.other_data[2]).lower() in ["true", "1"] else False),
-                        "oct": (True if str(response.other_data[3]).lower() in ["true", "1"] else False),
-                        "dec": (True if str(response.other_data[4]).lower() in ["true", "1"] else False),
-                        "hex": (True if str(response.other_data[5]).lower() in ["true", "1"] else False)}
+                perm = {"bin": (client.str_true(response.other_data[2])),
+                        "oct": (client.str_true(response.other_data[3])),
+                        "dec": (client.str_true(response.other_data[4])),
+                        "hex": (client.str_true(response.other_data[5]))}
                 operation = str(args[0]) + "_" + str(args[1])
                 if (operation in nums_conv.map_conv.keys()) and args[2]:
                     if perm.get(args[0]):
@@ -79,10 +79,10 @@ while meow:
         elif "my_perm" in command:
             response = asyncio.run(client.get_permission())
             print(
-                f"Права: bin {True if response.other_data[2] else False} ; "
-                f"oct: {True if response.other_data[3] else False}; "
-                f"dec: {True if response.other_data[4] else False}; "
-                f"hex: {True if response.other_data[5] else False}; ")
+                f"Права: bin {client.str_true(response.other_data[2])} ; "
+                f"oct: {client.str_true(response.other_data[3])}; "
+                f"dec: {client.str_true(response.other_data[4])}; "
+                f"hex: {client.str_true(response.other_data[5])}; ")
         elif "set_perm" in command:
             if len(args) == 3:
                 response = asyncio.run(client.set_permission(args[0], args[1], args[2]))
@@ -98,9 +98,9 @@ while meow:
                     print(
                         f"{num}) Пользователь: {user_info[1]}; "
                         f"Права администратора {True if user_info[3] else False}; "
-                        f"Ip: {user_info[4]}; Права: bin {True if response_perm[2] else False} ; oct:"
-                        f" {True if response_perm[3] else False}; dec: {True if response_perm[4] else False}; "
-                        f"hex: {True if response_perm[5] else False};\n")
+                        f"Ip: {user_info[4]}; Права: bin {client.str_true(response_perm[2])} ; oct:"
+                        f" {client.str_true(response_perm[3])}; dec: {client.str_true(response_perm[4])}; "
+                        f"hex: {client.str_true(response_perm[5])};\n")
             else:
                 raise Exception
         elif "show_ip" in command:
